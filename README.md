@@ -1,4 +1,5 @@
 # YOLO ROS: Real-Time Object Detection for ROS
+# 次世代アーム開発のため、2台のRealSenseで制御できるようにしています
 
 ## Overview
 
