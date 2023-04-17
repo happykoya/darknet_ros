@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.5.1)
 project(darknet_ros)
 
 # Set c++11 cmake flags
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_C_FLAGS "-Wall -Wno-unused-result -Wno-unknown-pragmas -Wno-unused-variable -Wfatal-errors -fPIC ${CMAKE_C_FLAGS}")
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_C_FLAGS "-Wall -Wno-unused-result -Wno-unknown-pragmas -Wno-unused-variable -Wfatal-errors -fPIC ${CMAKE_C_FLAGS}")
+#set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 
 # Define path of darknet folder here.
 find_path(DARKNET_PATH
@@ -23,7 +26,7 @@ if (CUDA_FOUND)
     CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS};
     -O3
-    -gencode arch=compute_30,code=sm_30
+    #-gencode arch=compute_30,code=sm_30
     -gencode arch=compute_35,code=sm_35
     -gencode arch=compute_50,code=[sm_50,compute_50]
     -gencode arch=compute_52,code=[sm_52,compute_52]
@@ -47,8 +50,6 @@ endif ( X11_FOUND )
 
 # Find rquired packeges
 find_package(Boost REQUIRED COMPONENTS thread)
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(catkin REQUIRED
   COMPONENTS
     cv_bridge
@@ -60,6 +61,9 @@ find_package(catkin REQUIRED
     image_transport
     nodelet
 )
+find_package(OpenCV REQUIRED)
+include_directories(/usr/local/include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}  )
+include_directories(include ${OpenCV_INCLUDE_DIRS})
 
 # Enable OPENCV in darknet
 add_definitions(-DOPENCV)
@@ -81,6 +85,8 @@ catkin_package(
     nodelet
   DEPENDS
     Boost
+    roscpp
+    sensor_msgs
 )
 
 include_directories(
@@ -190,6 +196,7 @@ target_link_libraries(${PROJECT_NAME}_lib
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
 )
+target_link_libraries(${PROJECT_NAME}_lib ${OpenCV_LIBRARIES} /usr/lib)
 
 target_link_libraries(${PROJECT_NAME}
   ${PROJECT_NAME}_lib
